@@ -15,9 +15,9 @@ const STATIC_ASSETS = [
   "/assets/icons/facebook.svg",
   "/assets/icons/google.svg",
   "/assets/icons/apple.svg",
-  "/icons/icon-36.png",
-  "/icons/icon-96.png",
-  "/icons/icon-192.png"
+  "/assets/icons/icon-36.png",
+  "/assets/icons/icon-96.png",
+  "/assets/icons/icon-192.png"
 ];
 
 // ✅ تثبيت الـ Service Worker وتخزين الملفات الثابتة
