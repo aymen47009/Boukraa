@@ -3,7 +3,7 @@
   "short_name": "BarberApp",
   "lang": "ar",
   "dir": "rtl",
-  "start_url": "/index.html",
+  "start_url": "/Boukraa/index.html",
   "display": "standalone",
   "orientation": "portrait",
   "scope": "/",
