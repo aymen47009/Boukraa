@@ -229,3 +229,34 @@ window.addEventListener("load", () => {
   requestNotificationPermission();
   fetchPriceList();
 });
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/Boukraa/service-worker.js') // تأكد من المسار الصحيح
+      .then(registration => {
+        console.log("✅ Service Worker Registered");
+
+        // الاستماع لوجود تحديث
+        registration.onupdatefound = () => {
+          const newWorker = registration.installing;
+          newWorker.onstatechange = () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log("🔄 تحديث جديد متاح، جاري التحديث تلقائيًا...");
+              newWorker.postMessage("skipWaiting");
+            }
+          };
+        };
+      })
+      .catch(err => {
+        console.error("❌ Service Worker Error:", err);
+      });
+
+    // عند تفعيل نسخة جديدة، أعد تحميل الصفحة
+    let refreshing;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (refreshing) return;
+      window.location.reload();
+      refreshing = true;
+    });
+  });
+}
