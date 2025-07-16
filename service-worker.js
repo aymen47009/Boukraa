@@ -1,5 +1,4 @@
 const BASE_URL = self.location.pathname.replace(/\/[^\/]*$/, "");
-
 const STATIC_CACHE = "barberapp-static-v1";
 const DYNAMIC_CACHE = "barberapp-dynamic-v1";
 
@@ -23,8 +22,7 @@ const STATIC_ASSETS = [
   `${BASE_URL}/assets/icons/icon-192.png`
 ];
 
-
-// ✅ تثبيت الـ Service Worker وتخزين الملفات الثابتة
+// ✅ تثبيت Service Worker وتخزين الملفات الثابتة
 self.addEventListener("install", (event) => {
   console.log("[SW] ✅ Installing Service Worker...");
   event.waitUntil(
@@ -32,8 +30,11 @@ self.addEventListener("install", (event) => {
       console.log("[SW] ✅ Caching static assets...");
       return Promise.all(
         STATIC_ASSETS.map((url) =>
-          cache.add(url).catch((err) => {
-            console.error("[SW] ❌ Failed to cache:", url, err);
+          fetch(url).then((response) => {
+            if (!response.ok) throw new Error(`Request failed: ${url}`);
+            return cache.put(url, response);
+          }).catch((err) => {
+            console.warn("[SW] ⚠️ Failed to cache:", url, err);
           })
         )
       );
@@ -42,8 +43,7 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-
-// ✅ تفعيل SW وحذف الكاش القديم
+// ✅ تفعيل وإزالة الكاش القديم
 self.addEventListener("activate", (event) => {
   console.log("[SW] ⚙️ Activating Service Worker...");
   event.waitUntil(
@@ -51,7 +51,7 @@ self.addEventListener("activate", (event) => {
       return Promise.all(
         keys.map((key) => {
           if (![STATIC_CACHE, DYNAMIC_CACHE].includes(key)) {
-            console.log("[SW] 🧹 Deleting old cache:", key);
+            console.log("[SW] 🧹 Removing old cache:", key);
             return caches.delete(key);
           }
         })
@@ -61,19 +61,15 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// ✅ إدارة الطلبات (fetch): static ثم dynamic cache
+// ✅ استراتيجية الجلب: الشبكة أولًا ثم الكاش للملفات الثابتة والديناميكية
 self.addEventListener("fetch", (event) => {
   const { request } = event;
-
   if (request.method !== "GET") return;
 
-  // ملفات ديناميكية (صور، فيديوهات، ...etc)
+  // ملفات ديناميكية (صور / فيديوهات / تحميلات)
   if (
     request.url.includes("/uploads/") ||
-    request.url.endsWith(".jpg") ||
-    request.url.endsWith(".jpeg") ||
-    request.url.endsWith(".webp") ||
-    request.url.endsWith(".mp4")
+    /\.(jpg|jpeg|webp|png|mp4)$/i.test(request.url)
   ) {
     event.respondWith(
       caches.open(DYNAMIC_CACHE).then((cache) => {
@@ -100,13 +96,13 @@ self.addEventListener("fetch", (event) => {
               return res;
             });
           })
-          .catch(() => caches.match("/index.html"))
+          .catch(() => caches.match(`${BASE_URL}/index.html`))
       );
     })
   );
 });
 
-// ✅ الإشعارات الفورية
+// ✅ إشعارات تنبيه الموعد
 self.addEventListener("push", (event) => {
   let data = {};
   try {
@@ -115,15 +111,17 @@ self.addEventListener("push", (event) => {
     data = {
       title: "🔔 تنبيه موعد الحلاقة",
       body: "اقترب موعد حلاقتك! اضغط لتأكيد الحجز.",
-      url: "/dashboard.html"
+      url: `${BASE_URL}/dashboard.html`
     };
   }
 
   const options = {
     body: data.body,
-    icon: "/icons/icon-192.png",
-    badge: "/icons/icon-96.png",
-    data: { url: data.url || "/" }
+    icon: `${BASE_URL}/assets/icons/icon-192.png`,
+    badge: `${BASE_URL}/assets/icons/icon-96.png`,
+    data: {
+      url: data.url || `${BASE_URL}/`
+    }
   };
 
   event.waitUntil(self.registration.showNotification(data.title, options));
@@ -167,7 +165,7 @@ async function sendHaircutReminderToServer() {
   }
 }
 
-// ✅ تحديث يدوي للسيرفس ووركر
+// ✅ الاستماع لتحديث SW يدويًا
 self.addEventListener("message", (event) => {
   if (event.data === "skipWaiting") {
     self.skipWaiting();
