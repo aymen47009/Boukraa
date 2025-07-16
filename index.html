@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <!-- ✅ البيانات الأساسية -->
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="احجز خدمة تنظيف المكيفات في ثوانٍ مع TopClim – جودة، سرعة، واحترافية." />
+  <meta name="keywords" content="تنظيف مكيفات, توب كليم, صيانة تكييف, topclim" />
+  <meta name="author" content="TopClim Team" />
+
+  <!-- ✅ العنوان -->
+  <title>تنظيف مكيفات – TopClim</title>
+
+  <!-- ✅ الخطوط -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet" />
+  
+  <!-- ✅ أيقونة الموقع -->
+  <link rel="icon" type="image/png" href="favicon.png" />
+
+  <!-- ✅ مكتبة Leaflet للخريطة -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- ✅ تنسيقات CSS مخصصة -->
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+
+    header, footer {
+      background-color: #007BFF;
+      color: white;
+      text-align: center;
+      padding: 20px 10px;
+    }
+
+    section {
+      padding: 20px;
+    }
+
+    h2 {
+      color: #333;
+      font-size: 24px;
+      margin-bottom: 15px;
+    }
+
+    .before-after {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .before-after img {
+      width: 48%;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      transition: transform 0.3s ease;
+    }
+
+    .before-after img:hover {
+      transform: scale(1.02);
+    }
+
+    form {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    form input,
+    form select,
+    form textarea,
+    form button {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s ease;
+    }
+
+    form input:focus,
+    form select:focus,
+    form textarea:focus {
+      border-color: #007BFF;
+      outline: none;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    form button {
+      background-color: #007BFF;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    form button:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+
+    #map {
+      height: 300px;
+      border-radius: 10px;
+      margin-top: 15px;
+    }
+
+    .note {
+      color: green;
+      font-weight: 500;
+      margin-top: 10px;
+    }
+
+    #landingTitle {
+      font-size: 30px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    #landingDesc {
+      font-size: 18px;
+      color: #e0e0e0;
+    }
+
+    #footerText {
+      font-size: 14px;
+    }
+
+    #acContainer .ac-group {
+      margin-bottom: 15px;
+      background-color: #f1f1f1;
+      padding: 10px;
+      border-radius: 8px;
+    }
+
+    #acContainer .ac-group label {
+      font-weight: bold;
+      display: block;
+      margin: 8px 0 5px;
+    }
+
+    /* ✅ الرسائل المؤقتة */
+    .flash-message {
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      background-color: #d4edda;
+      color: #155724;
+      display: none;
+    }
+
+    /* ✅ تحسينات لعرض الجوال */
+    @media screen and (max-width: 600px) {
+      .before-after img {
+        width: 100%;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      form input,
+      form select,
+      form textarea,
+      form button {
+        font-size: 14px;
+        padding: 10px;
+      }
+    }
+
+    /* ✅ تخصيص نص العنصر placeholder */
+    ::placeholder {
+      color: #aaa;
+      font-style: italic;
+    }
+
+    /* ✅ أنيميشن خفيف عند التحميل */
+    .fade-in {
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ✅ زر تحميل الموقع */
+    .loading-btn::after {
+      content: \" ⏳\";
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+  </style>
+
+  <!-- ✅ مكتبة Leaflet للخريطة -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+
+
+
+
+<body>
+
+  <!-- ✅ رأس الصفحة -->
+  <header id="pageHeader" class="fade-in">
+    <div style="padding: 20px 10px; text-align: center;">
+      <h2 id="landingTitle"></h2>
+      <p id="landingDesc"></p>
+    </div>
+  </header>
+
+  <!-- ✅ صورة البانر العلوية -->
+  <section>
+    <img id="headerImage" src="" alt="إعلان ترويجي" width="100%" style="border-radius: 12px;" />
+  </section>
+
+  <!-- ✅ صور قبل وبعد -->
+  <section>
+    <h2>📸 نتائج أعمالنا السابقة</h2>
+    <div class="before-after">
+      <img id="beforeImage" src="" alt="قبل التنظيف" />
+      <img id="afterImage" src="" alt="بعد التنظيف" />
+    </div>
+  </section>
+
+  <!-- ✅ نموذج إرسال الطلب -->
+  <section id="order">
+    <h2>📝 قدم طلبك الآن</h2>
+    <form id="orderForm" class="fade-in">
+
+      <input type="text" id="name" placeholder="الاسم الكامل" required />
+      <input type="tel" id="phone" placeholder="رقم الهاتف" required />
+      <input type="text" id="address" placeholder="العنوان الكامل" required />
+
+      <label>🕐 الوقت المناسب للزيارة:</label>
+      <select id="preferredTime" required>
+        <option value="" disabled selected>اختر الوقت المناسب</option>
+        <option value="صباحًا">صباحًا</option>
+        <option value="مساءً">مساءً</option>
+      </select>
+
+      <label>🗒️ ملاحظات إضافية:</label>
+      <textarea id="notes" placeholder="اكتب أي ملاحظات مهمة..." rows="3"></textarea>
+
+      <label>❄️ عدد المكيفات:</label>
+      <input type="number" id="acCount" min="1" max="10" value="1" onchange="generateACFields()" required />
+
+      <div id="acContainer"></div>
+
+      <label>📸 صورة للمكيف (اختياري):</label>
+      <input type="file" id="image" accept="image/*" capture="environment" />
+
+      <button type="button" onclick="getLocation()">📍 تحديد موقعي</button>
+      <p id="locationStatus" class="note"></p>
+      <div id="map"></div>
+
+      <button type="submit" id="sendBtn">📤 إرسال الطلب</button>
+    </form>
+  </section>
+
+  <!-- ✅ بانر سفلي ترويجي -->
+  <section>
+    <img id="footerImage" src="" alt="تنظيف احترافي مضمون" width="100%" style="border-radius: 12px;" />
+  </section>
+
+  <!-- ✅ الفوتر -->
+  <footer id="pageFooter">
+    <p id="footerText">جميع الحقوق محفوظة © TopClim 2025</p>
+  </footer>
+
+  <!-- ✅ عناصر إضافية مستقبلية -->
+  <section style="display: none;" id="futureFeature">
+    <h2>🚧 ميزة قادمة قريبًا</h2>
+    <p>سيتم إضافة خدمة التذكير التلقائي بالصيانة الموسمية.</p>
+  </section>
+
+  <!-- ✅ رسائل فورية (عند النجاح أو الخطأ) -->
+  <div class="flash-message" id="successMsg">✅ تم إرسال الطلب بنجاح!</div>
+  <div class="flash-message" id="errorMsg">❌ حدث خطأ أثناء إرسال الطلب.</div>
+
+  <!-- ✅ معلومات الشفافية -->
+  <section>
+    <h2>ℹ️ لماذا تختار TopClim؟</h2>
+    <ul>
+      <li>✔️ أسعار واضحة بدون رسوم خفية</li>
+      <li>✔️ سرعة استجابة عالية وخدمة ودية</li>
+      <li>✔️ دعم كامل للموقع والموقع الجغرافي</li>
+      <li>✔️ فريق ذو خبرة ويستخدم أدوات احترافية</li>
+    </ul>
+  </section>
+
+  <!-- ✅ قسم للتقييمات (مستقبلاً) -->
+  <section style="display: none;" id="reviewsSection">
+    <h2>⭐ تقييمات العملاء</h2>
+    <div id="reviewList">
+      <!-- سيتم ملء التقييمات من قاعدة البيانات -->
+    </div>
+  </section>
+
+
+  <script type="module">
+// ✅ استيراد Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  collection,
+  addDoc,
+  serverTimestamp,
+  getDocs,
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ✅ إعداد Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyBjbzbSd1XM9eyXrgKaVj6xnZgIJuQmbRI",
+  authDomain: "topclim-3edfa.firebaseapp.com",
+  projectId: "topclim-3edfa",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ✅ تحميل محتوى الصفحة من Firebase
+let typeOptions = [];
+let sizeOptions = [];
+
+async function loadLandingContent() {
+  try {
+    const docRef = doc(db, "landing", "landingContent");
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      const data = snap.data();
+      document.getElementById("headerImage").src = data.bannerTop || "";
+      document.getElementById("beforeImage").src = data.beforeImage || "";
+      document.getElementById("afterImage").src = data.afterImage || "";
+      document.getElementById("footerImage").src = data.bannerBottom || "";
+      document.getElementById("landingTitle").textContent = data.headerTitle || "";
+      document.getElementById("landingDesc").textContent = data.headerDesc || "";
+      document.getElementById("footerText").textContent = data.footerText || "";
+
+      if (data.headerColor) document.getElementById("pageHeader").style.backgroundColor = data.headerColor;
+      if (data.footerColor) document.getElementById("pageFooter").style.backgroundColor = data.footerColor;
+    }
+
+    const typesSnap = await getDocs(collection(db, "acTypes"));
+    const sizesSnap = await getDocs(collection(db, "acSizes"));
+
+    typeOptions = typesSnap.docs.map(doc => `<option value="${doc.data().name}">${doc.data().name}</option>`);
+    sizeOptions = sizesSnap.docs.map(doc => `<option value="${doc.data().label}">${doc.data().label}</option>`);
+
+    generateACFields();
+  } catch (error) {
+    console.error("⚠️ فشل في تحميل المحتوى:", error);
+  }
+}
+
+loadLandingContent();
+
+// ✅ إنشاء الحقول حسب عدد المكيفات
+window.generateACFields = function () {
+  const count = parseInt(document.getElementById("acCount").value) || 1;
+  const container = document.getElementById("acContainer");
+  container.innerHTML = "";
+
+  for (let i = 1; i <= count; i++) {
+    container.innerHTML += `
+      <div class="ac-group">
+        <label>🌀 نوع المكيف ${i}</label>
+        <select name="type${i}" required>
+          <option disabled selected>اختر النوع</option>
+          ${typeOptions.join("")}
+        </select>
+        <label>📏 حجم المكيف ${i}</label>
+        <select name="size${i}" required>
+          <option disabled selected>اختر الحجم</option>
+          ${sizeOptions.join("")}
+        </select>
+      </div>
+    `;
+  }
+};
+
+// ✅ ضغط الصورة
+function compressImage(file, quality = 0.6) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const scale = 800 / img.width;
+        canvas.width = 800;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, "image/jpeg", quality);
+      };
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ✅ تحديد الموقع
+let userLocation = null;
+
+window.getLocation = function () {
+  const status = document.getElementById("locationStatus");
+  status.textContent = "⏳ جاري تحديد الموقع...";
+
+  if (!navigator.geolocation) {
+    status.textContent = "❌ المتصفح لا يدعم تحديد الموقع.";
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      const accuracy = position.coords.accuracy;
+
+      userLocation = { lat, lng };
+      status.innerHTML = `✅ تم تحديد الموقع بدقة ~${Math.round(accuracy)} متر`;
+
+      const map = L.map("map").setView([lat, lng], 15);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "© OpenStreetMap contributors",
+      }).addTo(map);
+      L.marker([lat, lng]).addTo(map).bindPopup("📍 موقعك").openPopup();
+    },
+    () => {
+      status.textContent = "❌ تعذر تحديد الموقع.";
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    }
+  );
+};
+
+// ✅ إرسال الطلب
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("orderForm");
+  const imageInput = document.getElementById("image");
+  const successMsg = document.getElementById("successMsg");
+  const errorMsg = document.getElementById("errorMsg");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const btn = document.getElementById("sendBtn");
+    btn.disabled = true;
+    btn.innerText = "⏳ جاري الإرسال...";
+
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const preferredTime = document.getElementById("preferredTime").value;
+    const notes = document.getElementById("notes").value;
+    const acCount = parseInt(document.getElementById("acCount").value);
+
+    if (!preferredTime) {
+      alert("❌ يرجى اختيار الوقت المناسب للزيارة.");
+      btn.disabled = false;
+      btn.innerText = "📤 إرسال الطلب";
+      return;
+    }
+
+    const acUnits = [];
+    for (let i = 1; i <= acCount; i++) {
+      const type = form.querySelector(`[name=type${i}]`).value;
+      const size = form.querySelector(`[name=size${i}]`).value;
+      acUnits.push({ type, size });
+    }
+
+    let imageUrl = "";
+    const imageFile = imageInput.files[0];
+    if (imageFile) {
+      try {
+        const compressedImage = await compressImage(imageFile);
+        const formData = new FormData();
+        formData.append("file", compressedImage);
+        formData.append("upload_preset", "topclim_upload");
+        formData.append("folder", "TOPCLIMasset");
+
+        const res = await fetch("https://api.cloudinary.com/v1_1/dtrmfg2om/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+        imageUrl = data.secure_url;
+      } catch (uploadError) {
+        console.error("❌ فشل رفع الصورة:", uploadError);
+        alert("❌ تعذر رفع الصورة. جرب بدون صورة.");
+        btn.disabled = false;
+        btn.innerText = "📤 إرسال الطلب";
+        return;
+      }
+    }
+
+    try {
+      const docRef = await addDoc(collection(db, "requests"), {
+        name,
+        phone,
+        address,
+        acCount,
+        acUnits,
+        preferredTime,
+        notes,
+        location: userLocation,
+        imageUrl,
+        status: "مبدئي",
+        createdAt: serverTimestamp(),
+      });
+
+      successMsg.style.display = "block";
+      setTimeout(() => {
+        successMsg.style.display = "none";
+        window.location.href = `track.html?id=${docRef.id}`;
+      }, 2000);
+    } catch (err) {
+      console.error("❌ فشل إرسال الطلب:", err);
+      errorMsg.style.display = "block";
+      setTimeout(() => {
+        errorMsg.style.display = "none";
+      }, 3000);
+    }
+
+    btn.disabled = false;
+    btn.innerText = "📤 إرسال الطلب";
+  });
+});
+</script>
+
+</body>
+</html>
