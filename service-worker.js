@@ -1,26 +1,28 @@
+const BASE_URL = self.location.pathname.replace(/\/[^\/]*$/, "");
+
 const STATIC_CACHE = "barberapp-static-v1";
 const DYNAMIC_CACHE = "barberapp-dynamic-v1";
 
 const STATIC_ASSETS = [
-  "/",
-  "/index.html",
-  "/login.html",
-  "/register.html",
-  "/dashboard.html",
-  "/main.js",
-  "/dashboard.js",
-  "/manifest.json",
-  "/service-worker.js",
-  "/favicon.ico",
-  "/assets/barber.jpg",
-  "/assets/bg-dashboard.jpg",
-  "/assets/icons/facebook.svg",
-  "/assets/icons/google.svg",
-  "/assets/icons/apple.svg",
-  "/assets/icons/icon-36.png",
-  "/assets/icons/icon-96.png",
-  "/assets/icons/icon-192.png"
+  `${BASE_URL}/`,
+  `${BASE_URL}/index.html`,
+  `${BASE_URL}/login.html`,
+  `${BASE_URL}/register.html`,
+  `${BASE_URL}/dashboard.html`,
+  `${BASE_URL}/main.js`,
+  `${BASE_URL}/dashboard.js`,
+  `${BASE_URL}/manifest.json`,
+  `${BASE_URL}/favicon.ico`,
+  `${BASE_URL}/assets/barber.jpg`,
+  `${BASE_URL}/assets/bg-dashboard.jpg`,
+  `${BASE_URL}/assets/icons/facebook.svg`,
+  `${BASE_URL}/assets/icons/google.svg`,
+  `${BASE_URL}/assets/icons/apple.svg`,
+  `${BASE_URL}/assets/icons/icon-96.png`,
+  `${BASE_URL}/assets/icons/icon-36.png`,
+  `${BASE_URL}/assets/icons/icon-192.png`
 ];
+
 
 // ✅ تثبيت الـ Service Worker وتخزين الملفات الثابتة
 self.addEventListener("install", (event) => {
