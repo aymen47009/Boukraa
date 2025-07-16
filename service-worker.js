@@ -61,48 +61,49 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// ✅ استراتيجية الجلب: الشبكة أولًا ثم الكاش للملفات الثابتة والديناميكية
+// ✅ الجلب: الشبكة أولًا ثم الكاش
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
 
-  // ملفات ديناميكية (صور / فيديوهات / تحميلات)
+  // استثناء الطلبات الخارجية
+  if (request.url.startsWith("http") && !request.url.includes(self.location.origin)) return;
+
+  // ملفات ديناميكية
   if (
     request.url.includes("/uploads/") ||
     /\.(jpg|jpeg|webp|png|mp4)$/i.test(request.url)
   ) {
     event.respondWith(
-      caches.open(DYNAMIC_CACHE).then((cache) => {
-        return fetch(request)
+      caches.open(DYNAMIC_CACHE).then((cache) =>
+        fetch(request)
           .then((response) => {
             cache.put(request, response.clone());
             return response;
           })
-          .catch(() => caches.match(request));
-      })
+          .catch(() => caches.match(request))
+      )
     );
     return;
   }
 
   // ملفات ثابتة
   event.respondWith(
-    caches.match(request).then((cachedResponse) => {
-      return (
-        cachedResponse ||
-        fetch(request)
-          .then((res) => {
-            return caches.open(DYNAMIC_CACHE).then((cache) => {
-              cache.put(request, res.clone());
-              return res;
-            });
+    caches.match(request).then((cachedResponse) =>
+      cachedResponse ||
+      fetch(request)
+        .then((res) =>
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, res.clone());
+            return res;
           })
-          .catch(() => caches.match(`${BASE_URL}/index.html`))
-      );
-    })
+        )
+        .catch(() => caches.match(`${BASE_URL}/index.html`)) // أو offline.html إذا متوفر
+    )
   );
 });
 
-// ✅ إشعارات تنبيه الموعد
+// ✅ إشعارات الموعد
 self.addEventListener("push", (event) => {
   let data = {};
   try {
@@ -119,9 +120,7 @@ self.addEventListener("push", (event) => {
     body: data.body,
     icon: `${BASE_URL}/assets/icons/icon-192.png`,
     badge: `${BASE_URL}/assets/icons/icon-96.png`,
-    data: {
-      url: data.url || `${BASE_URL}/`
-    }
+    data: { url: data.url || `${BASE_URL}/` }
   };
 
   event.waitUntil(self.registration.showNotification(data.title, options));
@@ -144,7 +143,7 @@ self.addEventListener("notificationclick", (event) => {
   );
 });
 
-// ✅ دعم مزامنة الخلفية
+// ✅ مزامنة الخلفية
 self.addEventListener("sync", (event) => {
   if (event.tag === "sync-haircut-reminder") {
     event.waitUntil(sendHaircutReminderToServer());
@@ -165,17 +164,9 @@ async function sendHaircutReminderToServer() {
   }
 }
 
-// ✅ الاستماع لتحديث SW يدويًا
+// ✅ التحديث اليدوي
 self.addEventListener("message", (event) => {
   if (event.data === "skipWaiting") {
     self.skipWaiting();
   }
 });
-
-// ✅ تحديث يدوي للسيرفس ووركر
-self.addEventListener("message", (event) => {
-  if (event.data === "skipWaiting") {
-    self.skipWaiting();
-  }
-});
-
