@@ -1,52 +1,46 @@
-const CACHE_NAME = "barberapp-v1.0.0";
-const CACHE_URLS = [
+const STATIC_CACHE = "barberapp-static-v1";
+const DYNAMIC_CACHE = "barberapp-dynamic-v1";
+
+const STATIC_ASSETS = [
   "/",
   "/index.html",
   "/login.html",
   "/register.html",
- // "/profile.html",
- // "/booking.html",
-  //"/chat.html",
+  "/dashboard.html",
   "/main.js",
-  //"/style.css",
+  "/dashboard.js",
   "/manifest.json",
+  "/service-worker.js",
   "/assets/barber.jpg",
   "/assets/icons/facebook.svg",
   "/assets/icons/google.svg",
   "/assets/icons/apple.svg",
-  "/assets/icons/icon-36.png",
-  "/assets/icons/icon-192.png",
-  "/assets/icons/icon-96.png",
-  /*"/icons/icon-128.png",
-  "/icons/icon-144.png",
-  "/icons/icon-192.png",
-  "/icons/icon-384.png",
-  "/icons/icon-512.png"*/
+  "/icons/icon-36.png",
+  "/icons/icon-96.png",
+  "/icons/icon-192.png"
 ];
 
-// ✅ التثبيت: تحميل الملفات وتخزينها
+// ✅ تثبيت الـ Service Worker وتخزين الملفات الثابتة
 self.addEventListener("install", (event) => {
-  console.log("[SW] ✅ Service Worker Installing...");
-
+  console.log("[SW] ✅ Installing Service Worker...");
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log("[SW] ✅ Caching essential assets...");
-      return cache.addAll(CACHE_URLS);
+    caches.open(STATIC_CACHE).then((cache) => {
+      console.log("[SW] ✅ Caching static assets...");
+      return cache.addAll(STATIC_ASSETS);
     })
   );
   self.skipWaiting();
 });
 
-// ✅ التفعيل: حذف الكاش القديم
+// ✅ تفعيل SW وحذف الكاش القديم
 self.addEventListener("activate", (event) => {
-  console.log("[SW] ⚙️ Activating new Service Worker...");
-
+  console.log("[SW] ⚙️ Activating Service Worker...");
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then((keys) => {
       return Promise.all(
-        cacheNames.map((key) => {
-          if (key !== CACHE_NAME) {
-            console.log("[SW] 🔄 Removing old cache:", key);
+        keys.map((key) => {
+          if (![STATIC_CACHE, DYNAMIC_CACHE].includes(key)) {
+            console.log("[SW] 🧹 Deleting old cache:", key);
             return caches.delete(key);
           }
         })
@@ -56,30 +50,52 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// ✅ الجلب: استراتيجية الشبكة أولا ثم الكاش
+// ✅ إدارة الطلبات (fetch): static ثم dynamic cache
 self.addEventListener("fetch", (event) => {
   const { request } = event;
 
   if (request.method !== "GET") return;
 
+  // ملفات ديناميكية (صور، فيديوهات، ...etc)
+  if (
+    request.url.includes("/uploads/") ||
+    request.url.endsWith(".jpg") ||
+    request.url.endsWith(".jpeg") ||
+    request.url.endsWith(".webp") ||
+    request.url.endsWith(".mp4")
+  ) {
+    event.respondWith(
+      caches.open(DYNAMIC_CACHE).then((cache) => {
+        return fetch(request)
+          .then((response) => {
+            cache.put(request, response.clone());
+            return response;
+          })
+          .catch(() => caches.match(request));
+      })
+    );
+    return;
+  }
+
+  // ملفات ثابتة
   event.respondWith(
-    fetch(request)
-      .then((response) => {
-        const clonedResponse = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(request, clonedResponse);
-        });
-        return response;
-      })
-      .catch(() => {
-        return caches.match(request).then((response) => {
-          return response || caches.match("/offline.html");
-        });
-      })
+    caches.match(request).then((cachedResponse) => {
+      return (
+        cachedResponse ||
+        fetch(request)
+          .then((res) => {
+            return caches.open(DYNAMIC_CACHE).then((cache) => {
+              cache.put(request, res.clone());
+              return res;
+            });
+          })
+          .catch(() => caches.match("/index.html"))
+      );
+    })
   );
 });
 
-// ✅ إشعارات التنبيه عند اقتراب موعد الحلاقة
+// ✅ الإشعارات الفورية
 self.addEventListener("push", (event) => {
   let data = {};
   try {
@@ -87,8 +103,8 @@ self.addEventListener("push", (event) => {
   } catch (e) {
     data = {
       title: "🔔 تنبيه موعد الحلاقة",
-      body: "لقد اقترب موعد حلاقتك! اضغط لتأكيد أو تغيير الوقت.",
-      url: "/booking.html"
+      body: "اقترب موعد حلاقتك! اضغط لتأكيد الحجز.",
+      url: "/dashboard.html"
     };
   }
 
@@ -96,15 +112,13 @@ self.addEventListener("push", (event) => {
     body: data.body,
     icon: "/icons/icon-192.png",
     badge: "/icons/icon-96.png",
-    data: {
-      url: data.url || "/"
-    }
+    data: { url: data.url || "/" }
   };
 
   event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
-// ✅ التعامل مع الضغط على الإشعار
+// ✅ عند الضغط على إشعار
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   event.waitUntil(
@@ -121,7 +135,7 @@ self.addEventListener("notificationclick", (event) => {
   );
 });
 
-// ✅ الاستماع لمزامنة الخلفية
+// ✅ دعم مزامنة الخلفية
 self.addEventListener("sync", (event) => {
   if (event.tag === "sync-haircut-reminder") {
     event.waitUntil(sendHaircutReminderToServer());
@@ -136,40 +150,15 @@ async function sendHaircutReminderToServer() {
       headers: { "Content-Type": "application/json" }
     });
     if (!response.ok) throw new Error("Sync failed");
-    console.log("[SW] ✅ Reminder sent successfully");
+    console.log("[SW] ✅ Reminder sent");
   } catch (err) {
-    console.warn("[SW] ❌ Reminder failed to sync", err);
+    console.warn("[SW] ❌ Reminder failed", err);
   }
 }
 
-// ✅ تحديث يدوي عند إرسال رسالة من الصفحة
+// ✅ تحديث يدوي للسيرفس ووركر
 self.addEventListener("message", (event) => {
   if (event.data === "skipWaiting") {
     self.skipWaiting();
-  }
-});
-
-// ✅ تخزين ملفات ديناميكية بشكل ذكي (مثال: صور زبائن)
-const DYNAMIC_CACHE = "barberapp-dynamic-v1";
-
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  if (
-    request.url.includes("/uploads/") ||
-    request.url.endsWith(".jpg") ||
-    request.url.endsWith(".webp")
-  ) {
-    event.respondWith(
-      caches.open(DYNAMIC_CACHE).then((cache) => {
-        return fetch(request)
-          .then((response) => {
-            cache.put(request, response.clone());
-            return response;
-          })
-          .catch(() => {
-            return caches.match(request);
-          });
-      })
-    );
   }
 });
