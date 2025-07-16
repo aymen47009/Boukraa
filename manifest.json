@@ -1,0 +1,103 @@
+{
+  "name": "BarberApp - تطبيق الحلاقة الذكي",
+  "short_name": "BarberApp",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "background_color": "#0a0a0a",
+  "theme_color": "#fdd835",
+  "description": "احجز موعدك مع الحلاق، احصل على إشعارات دورية، أكسب النقاط، وتواصل مباشرة مع الحلاق. تطبيق الحلاقة الذكي الأول في منطقتك.",
+  "categories": ["lifestyle", "utilities", "productivity", "personalization"],
+  "iarc_rating_id": "e10+",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/icon-36.png",
+      "sizes": "36x36",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/screenshots/home.jpg",
+      "sizes": "720x1280",
+      "type": "image/jpg",
+      "label": "الصفحة الرئيسية - احجز موعدك بسهولة"
+    },
+    {
+      "src": "assets/screenshots/login.jpg",
+      "sizes": "720x1280",
+      "type": "image/jpg",
+      "label": "تسجيل الدخول السريع باستخدام جوجل أو الهاتف"
+    },
+    {
+      "src": "assets/screenshots/schedule.jpg",
+      "sizes": "720x1280",
+      "type": "image/jpg",
+      "label": "عرض المواعيد القادمة وتعديلها"
+    },
+    {
+      "src": "assets/screenshots/chat.jpg",
+      "sizes": "720x1280",
+      "type": "image/jpg",
+      "label": "الدردشة المباشرة مع الحلاق"
+    },
+    {
+      "src": "assets/screenshots/rewards.jpg",
+      "sizes": "720x1280",
+      "type": "image/jpg",
+      "label": "نظام نقاط المكافآت بعد كل حلاقة"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "حجز سريع",
+      "short_name": "احجز الآن",
+      "description": "افتح صفحة الحجز مباشرة",
+      "url": "/booking.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "الدردشة مع الحلاق",
+      "short_name": "الدردشة",
+      "description": "افتح صفحة الرسائل المباشرة مع الحلاق",
+      "url": "/chat.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "الملف الشخصي",
+      "short_name": "الملف",
+      "description": "صفحة بياناتك وحجوزاتك",
+      "url": "/profile.html",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.topbarber.app"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/id123456789"
+    }
+  ],
+  "permissions": [
+    "notifications",
+    "background-sync"
+  ],
+  "file_handlers": [],
+  "protocol_handlers": [],
+  "share_target": {
+    "action": "/share-target.html",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
+}

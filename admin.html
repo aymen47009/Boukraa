@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة الأدمين | BarberApp</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Cairo', sans-serif;
+      background-color: #121212;
+      color: white;
+    }
+    header {
+      background-color: #1e1e1e;
+      padding: 16px;
+      text-align: center;
+      color: #fdd835;
+      font-size: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+    }
+    nav {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      background-color: #1e1e1e;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0;
+      z-index: 1000;
+    }
+    nav button {
+      background: none;
+      border: none;
+      color: #fdd835;
+      font-size: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+    }
+    .container {
+      padding: 16px;
+      padding-bottom: 100px;
+    }
+    .section {
+      display: none;
+      background-color: #1e1e1e;
+      margin-bottom: 20px;
+      padding: 16px;
+      border-radius: 8px;
+    }
+    .section.active {
+      display: block;
+    }
+    .card {
+      background: #2a2a2a;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      text-align: right;
+      border-bottom: 1px solid #333;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: none;
+      background: #2a2a2a;
+      color: white;
+    }
+    button.btn {
+      background-color: #fdd835;
+      color: black;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button.btn.danger {
+      background-color: crimson;
+      color: white;
+    }
+    #add-client-form {
+      margin-top: 20px;
+      background: #1e1e1e;
+      padding: 16px;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>لوحة تحكم BarberApp</header>
+
+  <div class="container">
+    <div id="clients-section" class="section active">
+      <h2>👥 الزبائن</h2>
+      <div id="client-list"></div>
+
+      <form id="add-client-form">
+        <h3>➕ إضافة زبون جديد</h3>
+        <input type="text" id="new-client-name" placeholder="الاسم الكامل" required>
+        <input type="text" id="new-client-phone" placeholder="رقم الهاتف" required>
+        <input type="date" id="new-client-last-cut" placeholder="تاريخ آخر حلاقة">
+        <button type="button" class="btn" onclick="addClient()">إضافة الزبون</button>
+      </form>
+    </div>
+
+    <div id="appointments-section" class="section">
+      <h2>📅 المواعيد</h2>
+      <table>
+        <thead>
+          <tr><th>الاسم</th><th>الهاتف</th><th>التاريخ</th><th>الحالة</th><th>الإجراء</th></tr>
+        </thead>
+        <tbody id="appointments-table"></tbody>
+      </table>
+    </div>
+
+    <div id="upload-section" class="section">
+      <h2>📤 رفع وسائط</h2>
+      <form id="upload-form">
+        <input type="file" id="media-file" accept="image/*,video/*">
+        <input type="text" id="media-title" placeholder="عنوان الوسيط">
+        <button type="submit" class="btn">رفع إلى Cloudinary</button>
+        <p id="upload-status"></p>
+      </form>
+    </div>
+
+    <div id="notify-section" class="section">
+      <h2>📢 إرسال إشعار</h2>
+      <form id="notification-form">
+        <textarea id="notif-message" rows="4" placeholder="نص الرسالة..."></textarea>
+        <button type="submit" class="btn">إرسال</button>
+      </form>
+    </div>
+
+    <div id="settings-section" class="section">
+      <h2>⏳ إعداد الفاصل الزمني</h2>
+      <form id="gap-form">
+        <input type="number" id="gap-days" min="1" placeholder="عدد الأيام بين الحلاقات">
+        <button type="submit" class="btn">حفظ</button>
+      </form>
+    </div>
+
+    <div class="section" style="text-align: center;">
+      <button id="logout-btn" class="btn danger">تسجيل الخروج</button>
+    </div>
+  </div>
+
+  <nav>
+    <button onclick="showSection('clients-section')"><i class="fas fa-users"></i><span>الزبائن</span></button>
+    <button onclick="showSection('appointments-section')"><i class="fas fa-calendar-alt"></i><span>المواعيد</span></button>
+    <button onclick="showSection('upload-section')"><i class="fas fa-upload"></i><span>رفع</span></button>
+    <button onclick="showSection('notify-section')"><i class="fas fa-bell"></i><span>إشعار</span></button>
+    <button onclick="showSection('settings-section')"><i class="fas fa-cog"></i><span>الإعدادات</span></button>
+  </nav>
+
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function addClient() {
+      const name = document.getElementById('new-client-name').value.trim();
+      const phone = document.getElementById('new-client-phone').value.trim();
+      const lastCut = document.getElementById('new-client-last-cut').value;
+
+      if (!name || !phone) {
+        alert('يرجى ملء الاسم ورقم الهاتف');
+        return;
+      }
+
+      const clientCard = document.createElement('div');
+      clientCard.className = 'card';
+      clientCard.innerHTML = `
+        <strong>الاسم:</strong> ${name}<br>
+        <strong>الهاتف:</strong> ${phone}<br>
+        <strong>آخر حلاقة:</strong> ${lastCut || 'غير محدد'}
+      `;
+
+      document.getElementById('client-list').appendChild(clientCard);
+
+      document.getElementById('add-client-form').reset();
+    }
+  </script>
+</body>
+</html>

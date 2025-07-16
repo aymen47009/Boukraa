@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تسجيل الدخول - BarberApp</title>
+
+  <!-- خطوط -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- ستايل احترافي مع خلفية -->
+  <style>
+    :root {
+      --primary: #fdd835;
+      --primary-dark: #fbc02d;
+      --glass-bg: rgba(0, 0, 0, 0.6);
+      --border-color: rgba(255, 255, 255, 0.2);
+      --text-color: #fff;
+      --muted: #bbb;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      height: 100%;
+      font-family: 'Cairo', sans-serif;
+      background: url("assets/barber.jpg") no-repeat center center / cover;
+      color: var(--text-color);
+    }
+
+    .overlay {
+      background-color: rgba(0, 0, 0, 0.7);
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    .login-box {
+      position: relative;
+      z-index: 2;
+      max-width: 400px;
+      margin: auto;
+      margin-top: 10vh;
+      background: var(--glass-bg);
+      border: 1px solid var(--border-color);
+      padding: 30px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 24px;
+      color: var(--primary);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-color);
+      font-size: 1rem;
+    }
+
+    input::placeholder {
+      color: var(--muted);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--primary);
+      color: #000;
+      border: none;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .error {
+      color: #ff6b6b;
+      margin-top: 10px;
+      text-align: center;
+      display: none;
+    }
+
+    .footer-link {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .footer-link a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    @media (max-width: 500px) {
+      .login-box {
+        margin: 8vh 20px;
+        padding: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <div class="login-box">
+    <h2>تسجيل الدخول</h2>
+    <form id="login-form">
+      <div class="form-group">
+        <label for="email">البريد الإلكتروني</label>
+        <input type="email" id="email" required placeholder="example@email.com" />
+      </div>
+
+      <div class="form-group">
+        <label for="password">كلمة المرور</label>
+        <input type="password" id="password" required placeholder="********" />
+      </div>
+
+      <button type="submit" class="btn">تسجيل الدخول</button>
+      <div id="error-message" class="error">خطأ في تسجيل الدخول</div>
+    </form>
+
+    <div class="footer-link">
+      ليس لديك حساب؟ <a href="register.html">إنشاء حساب</a>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyC4lRLZEIaHDfeoigFxvjqQhxbIkU9NUuE",
+      authDomain: "hala9i.firebaseapp.com",
+      projectId: "hala9i",
+      storageBucket: "hala9i.firebasestorage.app",
+      messagingSenderId: "1068748204618",
+      appId: "1:1068748204618:web:238df060c97d48a735d4b3"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    const form = document.getElementById('login-form');
+    const errorBox = document.getElementById('error-message');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          window.location.href = 'dashboard.html';
+        })
+        .catch(error => {
+          errorBox.textContent = "❌ " + error.message;
+          errorBox.style.display = 'block';
+        });
+    });
+  </script>
+</body>
+</html>
