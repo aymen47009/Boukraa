@@ -28,7 +28,7 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
       console.log("[SW] ✅ Caching static assets...");
-      return cache.addAll(STATIC_ASSETS);
+      return cache.add(STATIC_ASSETS);
     })
   );
   self.skipWaiting();
