@@ -13,6 +13,7 @@ const STATIC_ASSETS = [
   "/service-worker.js",
   "/favicon.ico",
   "/assets/barber.jpg",
+  "/assets/bg-dashboard.jpg",
   "/assets/icons/facebook.svg",
   "/assets/icons/google.svg",
   "/assets/icons/apple.svg",
