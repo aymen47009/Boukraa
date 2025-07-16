@@ -4,10 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>تسجيل الدخول - BarberApp</title>
+  <link rel="icon" href="/Boukraa/favicon.ico" />
 
-  <link rel="icon" type="image/x-icon" href="/Boukraa/favicon.ico" />
-
-  <!-- ستايل احترافي مع خلفية -->
   <style>
     :root {
       --primary: #fdd835;
@@ -24,10 +22,10 @@
       box-sizing: border-box;
     }
 
-    body, html {
+    html, body {
       height: 100%;
-      font-family: 'Cairo', sans-serif;
-      background: url("assets/barber.jpg") no-repeat center center / cover;
+      background: url("/Boukraa/assets/barber.jpg") no-repeat center center / cover;
+      font-family: 'Poppins', sans-serif;
       color: var(--text-color);
     }
 
@@ -38,17 +36,17 @@
       position: absolute;
       top: 0;
       left: 0;
+      z-index: 0;
     }
 
     .login-box {
       position: relative;
-      z-index: 2;
+      z-index: 1;
       max-width: 400px;
-      margin: auto;
-      margin-top: 10vh;
+      margin: 10vh auto;
+      padding: 30px;
       background: var(--glass-bg);
       border: 1px solid var(--border-color);
-      padding: 30px;
       border-radius: 20px;
       backdrop-filter: blur(10px);
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
@@ -128,30 +126,28 @@
         padding: 24px;
       }
     }
-     @font-face {
-  font-family: 'Poppins';
-  src: url('/Boukraa/assets/fonts/Poppins/Poppins-Regular') format('.ttf');
-  font-weight: 400;
-  font-style: normal;
-}
 
-@font-face {
-  font-family: 'Poppins';
-  src: url('/Boukraa/assets/fonts/Poppins/Poppins-Bold') format('ttf');
-  font-weight: 700;
-  font-style: normal;
-}
+    /* ✅ خطوط محلية */
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/Boukraa/assets/fonts/Poppins/Poppins-Regular.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+    }
 
-@font-face {
-  font-family: 'Poppins';
-  src: url('/Boukraa/assets/fonts/Poppins/Poppins-Light') format('ttf');
-  font-weight: 300;
-  font-style: normal;
-}
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/Boukraa/assets/fonts/Poppins/Poppins-Bold.woff2') format('woff2');
+      font-weight: 700;
+      font-style: normal;
+    }
 
-    body {
-  font-family: 'Poppins', sans-serif;
-}
+    @font-face {
+      font-family: 'Poppins';
+      src: url('/Boukraa/assets/fonts/Poppins/Poppins-Light.woff2') format('woff2');
+      font-weight: 300;
+      font-style: normal;
+    }
   </style>
 </head>
 <body>
@@ -178,59 +174,61 @@
       ليس لديك حساب؟ <a href="register.html">إنشاء حساب</a>
     </div>
   </div>
- <!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
+  <!-- ✅ Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 
   <script>
-  window.gapi = null;
-  const firebaseConfig = {
-    apiKey: "AIzaSyC4lRLZEIaHDfeoigFxvjqQhxbIkU9NUuE",
-    authDomain: "hala9i.firebaseapp.com",
-    projectId: "hala9i",
-    storageBucket: "hala9i.appspot.com",
-    messagingSenderId: "1068748204618",
-    appId: "1:1068748204618:web:238df060c97d48a735d4b3"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyC4lRLZEIaHDfeoigFxvjqQhxbIkU9NUuE",
+      authDomain: "hala9i.firebaseapp.com",
+      projectId: "hala9i",
+      storageBucket: "hala9i.appspot.com",
+      messagingSenderId: "1068748204618",
+      appId: "1:1068748204618:web:238df060c97d48a735d4b3"
+    };
 
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-  const form = document.getElementById('login-form');
-  const errorBox = document.getElementById('error-message');
+    const form = document.getElementById('login-form');
+    const errorBox = document.getElementById('error-message');
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const identifier = document.getElementById('email').value.trim(); // اسم أو رقم الهاتف
-    const password = document.getElementById('password').value;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const identifier = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
 
-    try {
-      // 🔍 البحث عن المستخدم بالاسم أو رقم الهاتف
-      const querySnapshot = await db.collection("users")
-        .where("phone", "==", identifier)
-        .get();
+      try {
+        let querySnapshot = await db.collection("users")
+          .where("phone", "==", identifier)
+          .get();
 
-      if (querySnapshot.empty) {
-        throw new Error("🚫 لا يوجد مستخدم بهذا الاسم أو رقم الهاتف.");
+        if (querySnapshot.empty) {
+          // محاولة البحث بالاسم الكامل
+          querySnapshot = await db.collection("users")
+            .where("name", "==", identifier)
+            .get();
+        }
+
+        if (querySnapshot.empty) {
+          throw new Error("🚫 لا يوجد مستخدم بهذا الاسم أو رقم الهاتف.");
+        }
+
+        const userDoc = querySnapshot.docs[0];
+        const userData = userDoc.data();
+        const fakeEmail = `${userData.phone}@hala9i.com`;
+
+        await auth.signInWithEmailAndPassword(fakeEmail, password);
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        errorBox.textContent = "❌ " + (error.message.includes("auth") ? "تحقق من المعلومات المدخلة" : error.message);
+        errorBox.style.display = 'block';
       }
-
-      const userDoc = querySnapshot.docs[0];
-      const userData = userDoc.data();
-
-      const fakeEmail = `${userData.phone}@hala9i.com`;
-
-      // ✅ تسجيل الدخول بالبريد الوهمي وكلمة المرور
-      await auth.signInWithEmailAndPassword(fakeEmail, password);
-      window.location.href = "dashboard.html";
-
-    } catch (error) {
-      errorBox.textContent = "❌ " + error.message;
-      errorBox.style.display = 'block';
-    }
-  });
-</script>
-
+    });
+  </script>
 </body>
 </html>
