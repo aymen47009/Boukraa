@@ -171,3 +171,11 @@ self.addEventListener("message", (event) => {
     self.skipWaiting();
   }
 });
+
+// ✅ تحديث يدوي للسيرفس ووركر
+self.addEventListener("message", (event) => {
+  if (event.data === "skipWaiting") {
+    self.skipWaiting();
+  }
+});
+
