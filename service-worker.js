@@ -11,6 +11,7 @@ const STATIC_ASSETS = [
   "/dashboard.js",
   "/manifest.json",
   "/service-worker.js",
+  "/favicon.ico",
   "/assets/barber.jpg",
   "/assets/icons/facebook.svg",
   "/assets/icons/google.svg",
