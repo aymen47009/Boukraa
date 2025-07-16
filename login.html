@@ -160,8 +160,8 @@
     <h2>تسجيل الدخول</h2>
     <form id="login-form">
       <div class="form-group">
-        <label for="email">البريد الإلكتروني</label>
-        <input type="email" id="email" required placeholder="example@email.com" />
+        <label for="email">رقم الهاتف أو الاسم</label>
+        <input type="text" id="email" required placeholder="مثلاً 0666123456 أو اسمك الكامل" />
       </div>
 
       <div class="form-group">
@@ -182,35 +182,52 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyC4lRLZEIaHDfeoigFxvjqQhxbIkU9NUuE",
-      authDomain: "hala9i.firebaseapp.com",
-      projectId: "hala9i",
-      storageBucket: "hala9i.firebasestorage.app",
-      messagingSenderId: "1068748204618",
-      appId: "1:1068748204618:web:238df060c97d48a735d4b3"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyC4lRLZEIaHDfeoigFxvjqQhxbIkU9NUuE",
+    authDomain: "hala9i.firebaseapp.com",
+    projectId: "hala9i",
+    storageBucket: "hala9i.appspot.com",
+    messagingSenderId: "1068748204618",
+    appId: "1:1068748204618:web:238df060c97d48a735d4b3"
+  };
 
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-    const form = document.getElementById('login-form');
-    const errorBox = document.getElementById('error-message');
+  const form = document.getElementById('login-form');
+  const errorBox = document.getElementById('error-message');
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const identifier = document.getElementById('email').value.trim(); // اسم أو رقم الهاتف
+    const password = document.getElementById('password').value;
 
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-          window.location.href = 'dashboard.html';
-        })
-        .catch(error => {
-          errorBox.textContent = "❌ " + error.message;
-          errorBox.style.display = 'block';
-        });
-    });
-  </script>
+    try {
+      // 🔍 البحث عن المستخدم بالاسم أو رقم الهاتف
+      const querySnapshot = await db.collection("users")
+        .where("phone", "==", identifier)
+        .get();
+
+      if (querySnapshot.empty) {
+        throw new Error("🚫 لا يوجد مستخدم بهذا الاسم أو رقم الهاتف.");
+      }
+
+      const userDoc = querySnapshot.docs[0];
+      const userData = userDoc.data();
+
+      const fakeEmail = `${userData.phone}@hala9i.com`;
+
+      // ✅ تسجيل الدخول بالبريد الوهمي وكلمة المرور
+      await auth.signInWithEmailAndPassword(fakeEmail, password);
+      window.location.href = "dashboard.html";
+
+    } catch (error) {
+      errorBox.textContent = "❌ " + error.message;
+      errorBox.style.display = 'block';
+    }
+  });
+</script>
+
 </body>
 </html>
