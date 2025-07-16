@@ -28,11 +28,18 @@ self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(STATIC_CACHE).then((cache) => {
       console.log("[SW] ✅ Caching static assets...");
-      return cache.add(STATIC_ASSETS);
+      return Promise.all(
+        STATIC_ASSETS.map((url) =>
+          cache.add(url).catch((err) => {
+            console.error("[SW] ❌ Failed to cache:", url, err);
+          })
+        )
+      );
     })
   );
   self.skipWaiting();
 });
+
 
 // ✅ تفعيل SW وحذف الكاش القديم
 self.addEventListener("activate", (event) => {
